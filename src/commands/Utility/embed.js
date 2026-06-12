@@ -1,64 +1,42 @@
-import { EmbedBuilder, PermissionFlagsBits } from 'discord.js';
+import { SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
+import { createEmbed } from '../utils/embed.js';
 
-const colors = {
-    blue: '#3498db',
-    red: '#e74c3c',
-    green: '#2ecc71',
-    orange: '#f39c12',
-    yellow: '#f1c40f',
-    purple: '#9b59b6',
-    pink: '#ff69b4',
-    black: '#2c3e50',
-    white: '#ffffff',
-    gold: '#ffd700',
-    aqua: '#1abc9c'
-};
+export default {
+    data: new SlashCommandBuilder()
+        .setName('embed')
+        .setDescription('Create a custom embed')
+        .addStringOption(option =>
+            option.setName('title')
+                .setDescription('Embed title')
+                .setRequired(true)
+        )
+        .addStringOption(option =>
+            option.setName('description')
+                .setDescription('Embed description')
+                .setRequired(true)
+        )
+        .addStringOption(option =>
+            option.setName('color')
+                .setDescription('Embed color (blue, red, green, orange, etc.)')
+                .setRequired(false)
+        )
+        // 🔒 optional: only admins can use it
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
-// ----------------------
-// EMBED CREATOR
-// ----------------------
-export function createEmbed({
-    title = '',
-    description = '',
-    color = 'blue',
-    footer = null,
-    thumbnail = null,
-    image = null
-}) {
-    const embed = new EmbedBuilder()
-        .setColor(colors[color.toLowerCase()] || colors.blue)
-        .setTitle(title)
-        .setDescription(description)
-        .setTimestamp();
+    async execute(interaction) {
 
-    if (footer) embed.setFooter({ text: footer });
-    if (thumbnail) embed.setThumbnail(thumbnail);
-    if (image) embed.setImage(image);
+        const title = interaction.options.getString('title');
+        const description = interaction.options.getString('description');
+        const color = interaction.options.getString('color') || 'blue';
 
-    return embed;
-}
+        const embed = createEmbed({
+            title,
+            description,
+            color
+        });
 
-// ----------------------
-// ADMIN GUARD (PUTS EVERYTHING HERE)
-// ----------------------
-export async function adminOnly(interaction, callback) {
-    const isAdmin = interaction.member.permissions.has(
-        PermissionFlagsBits.Administrator
-    );
-
-    if (!isAdmin) {
         return interaction.reply({
-            embeds: [
-                createEmbed({
-                    title: '❌ No Permission',
-                    description: 'You need **Administrator** to use this command.',
-                    color: 'red'
-                })
-            ],
-            ephemeral: true
+            embeds: [embed]
         });
     }
-
-    // run command if admin
-    return callback();
-}
+};
