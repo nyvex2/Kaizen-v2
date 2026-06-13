@@ -37,14 +37,6 @@ export default {
                         )
                         .setRequired(true),
                 )
-                .addStringOption((option) =>
-                    option
-                        .setName("button_label")
-                        .setDescription(
-                            "The label for the ticket creation button (default: Create Ticket)",
-                        )
-                        .setRequired(false),
-                )
                 .addChannelOption((option) =>
                     option
                         .setName("category")
